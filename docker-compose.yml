@@ -45,6 +45,18 @@ services:
       - "traefik.http.routers.whoami.entrypoints=websecure"
       # Add the following label
       - "traefik.http.routers.whoami.tls=true"
+      # Secure Headers Middleware
+      - "traefik.http.middlewares.secure-headers.headers.frameDeny=true"
+      - "traefik.http.middlewares.secure-headers.headers.sslRedirect=true"
+      - "traefik.http.middlewares.secure-headers.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.secure-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.secure-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.secure-headers.headers.stsPreload=true"
+      - "traefik.http.middlewares.secure-headers.headers.stsSeconds=31536000"
+      # IP Allowlist Middleware
+      - "traefik.http.middlewares.ip-allowlist.ipallowlist.sourceRange=127.0.0.1/32,192.168.0.0/16,10.0.0.0/8"
+      # Apply middlewares to whoami router
+      - "traefik.http.routers.whoami.middlewares=secure-headers,ip-allowlist"
 
   whoami-api:
     image: "traefik/whoami"
@@ -60,6 +72,8 @@ services:
       - "traefik.http.routers.whoami-api.entrypoints=websecure"
       # Add the following label
       - "traefik.http.routers.whoami-api.tls=true"
+      # IP Allowlist Middleware
+      - "traefik.http.routers.whoami-api.middlewares=secure-headers,ip-allowlist"
 
 networks:
   proxy:
